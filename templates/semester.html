@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="welcome">
+<div>
+<span class="eyebrow">CURRENT SEMESTER</span>
+<h1>Semester {{ student['current_semester'] }}</h1>
+<p>{{ attended }} attended · {{ absent }} absent · {{ total }} total classes</p>
+</div>
+<a class="pill" href="{{ url_for('calculator') }}">Calculate plan →</a>
+</div>
+
+<section class="hero-grid compact">
+<article class="glass attendance-hero">
+<span>SEMESTER ATTENDANCE</span>
+<div class="ring" style="--pct:{{ attendance }}"><b>{{ attendance }}%</b></div>
+</article>
+<article class="glass metrics">
+<div><b>{{ total }}</b><span>Total Classes</span></div>
+<div><b>{{ attended }}</b><span>Attended</span></div>
+<div><b>{{ absent }}</b><span>Absent</span></div>
+</article>
+</section>
+
+{% if notices %}
+<section>
+<div class="section-title"><h2>Important Notices</h2></div>
+<div class="notice-grid">
+{% for n in notices %}
+<article class="glass notice-card important">
+<span class="notice-tag">Important</span>
+<h3>{{ n['title'] }}</h3>
+<p>{{ n['message'] }}</p>
+</article>
+{% endfor %}
+</div>
+</section>
+{% endif %}
+
+<section>
+<div class="section-title"><h2>Subjects</h2></div>
+<div class="subject-grid wide">
+{% for x in subjects %}
+<article class="glass subject-card">
+<div><span>{{ x['code'] }}</span><b class="badge {{ x['status'] }}">{{ x['status'] }}</b></div>
+<h3>{{ x['name'] }}</h3>
+<strong>{{ x['percentage'] }}%</strong>
+<div class="progress"><i style="width:{{ x['percentage'] }}%"></i></div>
+<small>{{ x['attended'] }} attended · {{ x['absent'] }} absent · {{ x['total'] }} total</small>
+</article>
+{% endfor %}
+</div>
+</section>
+{% endblock %}

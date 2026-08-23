@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-head">
+<span class="eyebrow">ANALYTICS · {{ semester_label }}</span>
+<h1>Current semester attendance, made visible.</h1>
+<p>All charts reflect Semester {{ student['current_semester'] }} only — previous semesters are excluded.</p>
+</div>
+
+<section class="chart-card glass">
+<h2>Subject Comparison</h2>
+<canvas id="attendance-chart" data-labels='{{ subjects|map(attribute="name")|list|tojson }}' data-values='{{ subjects|map(attribute="percentage")|list|tojson }}'></canvas>
+</section>
+
+<section class="chart-card glass">
+<h2>Attendance Trend</h2>
+<canvas id="trend-chart" data-labels='{{ trend_labels|tojson }}' data-values='{{ trend_values|tojson }}'></canvas>
+</section>
+
+<div class="analytics-grid">
+<article class="glass mini-stat">
+<b>{{ current['attended'] }}</b>
+<span>Present</span>
+</article>
+<article class="glass mini-stat">
+<b>{{ current['absent'] }}</b>
+<span>Absent</span>
+</article>
+<article class="glass mini-stat">
+<b>{{ current['percentage'] }}%</b>
+<span>Current</span>
+</article>
+</div>
+
+<section class="glass insight analytics-insight">
+<span>✦ PREDICTION</span>
+<h2>{{ prediction['message'] }}</h2>
+</section>
+
+<div class="subject-grid wide">
+{% for x in subjects %}
+<article class="glass subject-card">
+<span>{{ x['code'] }}</span>
+<h3>{{ x['name'] }}</h3>
+<strong>{{ x['percentage'] }}%</strong>
+<p>{{ x['attended'] }} present / {{ x['absent'] }} absent</p>
+</article>
+{% endfor %}
+</div>
+{% endblock %}

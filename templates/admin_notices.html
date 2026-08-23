@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Notices Management — Admin SmartAttend{% endblock %}
+{% block content %}
+<div class="page-head">
+<span class="eyebrow">NOTICE MANAGEMENT</span>
+<h1>Create and manage notices.</h1>
+</div>
+
+<section class="calc-layout">
+<form class="glass calc-form" method="post">
+<input type="hidden" name="action" value="create">
+<h2>Create Notice</h2>
+<label>Title<input name="title" required></label>
+<label>Message<textarea name="message" rows="4" required></textarea></label>
+<label>Audience
+<select name="semester_number">
+<option value="all">All Students / All Semesters</option>
+{% for n in active_sem_numbers %}
+<option value="{{ n }}">Semester {{ n }} (Active)</option>
+{% endfor %}
+{% for n in range(1,9) %}
+{% if n not in active_sem_numbers %}
+<option value="{{ n }}">Semester {{ n }}</option>
+{% endif %}
+{% endfor %}
+</select>
+</label>
+<label class="checkbox-label"><input type="checkbox" name="is_important"> Mark as important</label>
+<button>Publish Notice</button>
+</form>
+<article class="glass leave-info">
+<h2>Notice rules</h2>
+<ul>
+<li>Active semester notices appear only for students in that semester.</li>
+<li>All-semester notices appear for every student.</li>
+<li>Important notices are highlighted on the dashboard.</li>
+</ul>
+</article>
+</section>
+
+<div class="notice-grid">
+{% for n in notices %}
+<article class="glass notice-card {{ 'important' if n['is_important'] else '' }}">
+{% if n['is_important'] %}<span class="notice-tag">Important</span>{% endif %}
+<span class="notice-meta">
+{% if n['semester_number'] %}Semester {{ n['semester_number'] }}{% else %}All Students{% endif %}
+· {{ n['created_at'][:10] }}
+</span>
+<h3>{{ n['title'] }}</h3>
+<p>{{ n['message'] }}</p>
+<form method="post" class="notice-edit-form">
+<input type="hidden" name="action" value="edit">
+<input type="hidden" name="notice_id" value="{{ n['id'] }}">
+<input name="title" value="{{ n['title'] }}">
+<textarea name="message" rows="3">{{ n['message'] }}</textarea>
+<select name="semester_number">
+<option value="all" {% if not n['semester_number'] %}selected{% endif %}>All Students</option>
+{% for num in range(1,9) %}
+<option value="{{ num }}" {% if n['semester_number']==num %}selected{% endif %}>Semester {{ num }}</option>
+{% endfor %}
+</select>
+<label class="checkbox-label"><input type="checkbox" name="is_important" {% if n['is_important'] %}checked{% endif %}> Important</label>
+<button type="submit">Update</button>
+</form>
+<form method="post" class="inline-form">
+<input type="hidden" name="action" value="delete">
+<input type="hidden" name="notice_id" value="{{ n['id'] }}">
+<button type="submit" class="btn-danger">Delete</button>
+</form>
+</article>
+{% else %}
+<article class="glass notice-card"><p>No notices created yet.</p></article>
+{% endfor %}
+</div>
+{% endblock %}

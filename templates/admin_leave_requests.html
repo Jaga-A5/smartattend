@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Leave Requests — Admin SmartAttend{% endblock %}
+{% block content %}
+<div class="page-head">
+<span class="eyebrow">LEAVE REQUEST MANAGEMENT</span>
+<h1>Review and respond to student leave requests.</h1>
+</div>
+
+<div class="leave-filter-tabs glass" style="padding:12px 20px;margin-bottom:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+  <span style="font-size:12px;font-weight:700;color:var(--muted)">FILTER:</span>
+  <a href="{{ url_for('admin_leave_requests', status='all') }}" class="filter-tab {{ 'filter-active' if filter_status=='all' else '' }}">All Requests</a>
+  <a href="{{ url_for('admin_leave_requests', status='pending') }}" class="filter-tab {{ 'filter-active' if filter_status=='pending' else '' }}">⏳ Pending</a>
+</div>
+
+<div class="leave-grid wide">
+{% for r in requests %}
+<article class="glass leave-card admin-leave">
+<div class="leave-head">
+<b class="badge {{ 'warning' if r['status']=='pending' else 'safe' if r['status']=='approved' else 'critical' }}">{{ r['status']|capitalize }}</b>
+<span>{{ r['created_at'][:10] }}</span>
+</div>
+<h3>{{ r['student_name'] }} · {{ r['login_id'] }}</h3>
+<p>Semester {{ r['semester_number'] }} · {{ r['start_date'] }} → {{ r['end_date'] }}</p>
+<p>{{ r['reason'] }}</p>
+{% if r['document_filename'] %}
+<a class="link" href="{{ url_for('admin_leave_document', request_id=r['id']) }}">⬇ Download document →</a>
+{% endif %}
+{% if r['admin_note'] %}
+<p class="admin-note"><strong>Admin note:</strong> {{ r['admin_note'] }}</p>
+{% endif %}
+{% if r['status'] == 'pending' %}
+<form method="post" class="admin-action-form">
+<input type="hidden" name="request_id" value="{{ r['id'] }}">
+<label>Admin note (optional)<textarea name="admin_note" rows="2"></textarea></label>
+<button type="submit" name="action" value="approved">✓ Approve</button>
+<button type="submit" name="action" value="rejected" class="btn-danger">✕ Reject</button>
+</form>
+{% endif %}
+</article>
+{% else %}
+<article class="glass leave-card"><p>No leave requests found.</p></article>
+{% endfor %}
+</div>
+{% endblock %}

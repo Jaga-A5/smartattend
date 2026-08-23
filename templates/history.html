@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-head">
+<span class="eyebrow">ATTENDANCE HISTORY · {{ semester_label }}</span>
+<h1>Semester {{ student['current_semester'] }} attendance history.</h1>
+<p>Read-only records for your current semester. Previous semesters are not shown here.</p>
+</div>
+<div class="glass table-wrap">
+<table>
+<thead>
+<tr><th>Date</th><th>Subject</th><th>Status</th></tr>
+</thead>
+<tbody>
+{% for r in records %}
+<tr>
+<td>{{ r['record_date'] }}</td>
+<td>{{ r['subject_name'] }}</td>
+<td><b class="badge {{ 'safe' if r['status']=='present' else 'critical' }}">{{ r['status']|capitalize }}</b></td>
+</tr>
+{% else %}
+<tr><td colspan="3">No attendance records for this semester yet.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

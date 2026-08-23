@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-head">
+<span class="eyebrow">LEAVE REQUESTS · SEMESTER {{ student['current_semester'] }}</span>
+<h1>Submit and track leave requests.</h1>
+<p>Upload a leave letter (PDF, DOC, DOCX, JPG, JPEG, or PNG).</p>
+</div>
+
+<section class="calc-layout">
+<form class="glass calc-form leave-form" method="post" enctype="multipart/form-data">
+<label>Start date<input type="date" name="start_date" required></label>
+<label>End date<input type="date" name="end_date" required></label>
+<label>Reason<textarea name="reason" rows="4" required placeholder="Describe the reason for leave"></textarea></label>
+<label>Leave letter<input type="file" name="document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required></label>
+<button>Submit Leave Request</button>
+</form>
+<article class="glass leave-info">
+<h2>Guidelines</h2>
+<ul>
+<li>Requests apply to Semester {{ student['current_semester'] }} only.</li>
+<li>Allowed formats: PDF, DOC, DOCX, JPG, JPEG, PNG.</li>
+<li>Maximum file size: 5 MB.</li>
+<li>Only administrators can approve or reject requests.</li>
+</ul>
+</article>
+</section>
+
+<section>
+<div class="section-title"><h2>Your Requests</h2></div>
+<div class="leave-grid">
+{% for r in requests %}
+<article class="glass leave-card">
+<div class="leave-head">
+<b class="badge {{ 'warning' if r['status']=='pending' else 'safe' if r['status']=='approved' else 'critical' }}">{{ r['status']|capitalize }}</b>
+<span>{{ r['created_at'][:10] }}</span>
+</div>
+<h3>{{ r['start_date'] }} → {{ r['end_date'] }}</h3>
+<p>{{ r['reason'] }}</p>
+{% if r['document_filename'] %}
+<a class="link" href="{{ url_for('leave_document', request_id=r['id']) }}" target="_blank">View document →</a>
+{% endif %}
+{% if r['admin_note'] %}
+<p class="admin-note"><strong>Admin note:</strong> {{ r['admin_note'] }}</p>
+{% endif %}
+</article>
+{% else %}
+<article class="glass leave-card"><p>No leave requests submitted yet.</p></article>
+{% endfor %}
+</div>
+</section>
+{% endblock %}

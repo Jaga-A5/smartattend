@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}{{ student['name'] }} — Admin SmartAttend{% endblock %}
+{% block content %}
+<div class="welcome">
+<div>
+<a class="back" href="{{ url_for('admin_dashboard') }}">← Student list</a>
+<span class="eyebrow">STUDENT REVIEW</span>
+<h1>{{ student['name'] }}</h1>
+<p>{{ student['student_id'] }} · {{ student['department'] }}</p>
+</div>
+<a class="pill" href="{{ url_for('admin_subjects', student_id=student['id']) }}">Manage subjects →</a>
+</div>
+
+{% if student['current_semester'] and semester %}
+{# Active semester exists #}
+<div class="admin-sem-status-bar glass sem-active-bar">
+  <div>
+    <span class="eyebrow">ACTIVE SEMESTER</span>
+    <h2 style="margin:4px 0">Semester {{ student['current_semester'] }}</h2>
+    <p style="margin:0">This semester is currently active.</p>
+  </div>
+{% set close_msg = "Close Semester " ~ student['current_semester'] ~ " for " ~ student['name'] ~ "?\n\nThis will:\n\u2022 Archive attendance data as read-only history\n\u2022 Allow starting a new semester\n\nThis cannot be undone." %}
+  <form method="post" action="{{ url_for('admin_close_semester', student_id=student['id']) }}"
+        onsubmit="return confirm(this.dataset.msg)" data-msg="{{ close_msg }}">
+    <button type="submit" class="btn-danger close-sem-btn">🔒 Close & Archive Semester {{ student['current_semester'] }}</button>
+  </form>
+</div>
+
+<section class="hero-grid compact">
+<article class="glass attendance-hero">
+<span>CURRENT SEMESTER ATTENDANCE</span>
+<div class="ring" style="--pct:{{ current['percentage'] }}"><b>{{ current['percentage'] }}%</b></div>
+<strong class="badge {{ current['status'] }}">{{ current['status'] }}</strong>
+</article>
+<article class="glass metrics">
+<div><b>{{ current['attended'] }}</b><span>Attended</span></div>
+<div><b>{{ current['total'] }}</b><span>Total</span></div>
+<div><b>{{ current['absent'] }}</b><span>Absent</span></div>
+</article>
+</section>
+
+{% if semester and semester['subjects'] %}
+<div class="section-title"><h2>Semester {{ student['current_semester'] }} Subjects</h2></div>
+<div class="subject-grid wide">
+{% for x in semester['subjects'] %}
+<article class="glass subject-card">
+<div><span>{{ x['code'] }}</span><b class="badge {{ x['status'] }}">{{ x['status'] }}</b></div>
+<h3>{{ x['name'] }}</h3>
+<strong>{{ x['percentage'] }}%</strong>
+<small>{{ x['attended'] }} / {{ x['total'] }} classes</small>
+</article>
+{% endfor %}
+</div>
+{% endif %}
+
+{% else %}
+{# No active semester — show start new semester form #}
+<div class="admin-sem-status-bar glass sem-closed-bar">
+  <div>
+    <span class="eyebrow">SEMESTER STATUS</span>
+    <h2 style="margin:4px 0">No Active Semester</h2>
+    <p style="margin:0">The previous semester has been closed. You can start a new semester below.</p>
+  </div>
+  <span class="badge warning" style="font-size:14px;padding:10px 18px">⚠ Awaiting New Semester</span>
+</div>
+
+<div class="glass start-sem-card">
+  <h2>🚀 Start New Semester</h2>
+  <p>Select the semester number, then add subjects and a timetable for the student.</p>
+  <form method="post" action="{{ url_for('admin_start_semester', student_id=student['id']) }}" class="start-sem-form">
+    <label>Semester Number
+      <select name="semester_number" required>
+        {% for n in range(1, 9) %}
+        <option value="{{ n }}"
+          {% if student['current_semester'] and n == student['current_semester'] + 1 %}selected{% endif %}>
+          Semester {{ n }}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit" class="pill" style="margin-top:8px;display:inline-block">Start Semester →</button>
+  </form>
+</div>
+{% endif %}
+
+{# Academic History #}
+{% if history %}
+<div class="section-title" style="margin-top:32px"><h2>Academic History</h2><span style="color:var(--muted);font-size:13px">Read-only archived semesters</span></div>
+{% for h in history %}
+<article class="glass history-sem-card compact-history">
+  <div class="history-sem-header">
+    <div class="history-sem-info">
+      <span class="eyebrow">ARCHIVED</span>
+      <h3 style="margin:4px 0">{{ h['semester_label'] }}</h3>
+      <span class="history-closed-at">Closed: {{ h['closed_at'][:10] }}</span>
+    </div>
+    <div class="history-sem-stats">
+      <div class="ring" style="--pct:{{ h['percentage'] }};width:80px;height:80px">
+        <b style="font-size:16px">{{ h['percentage'] }}%</b>
+      </div>
+      <div class="history-metrics small">
+        <div><b>{{ h['total_classes'] }}</b><span>Total</span></div>
+        <div><b>{{ h['attended_classes'] }}</b><span>Attended</span></div>
+        <div><b>{{ h['absent_classes'] }}</b><span>Absent</span></div>
+      </div>
+    </div>
+  </div>
+  {% if h['subjects'] %}
+  <div class="history-subjects-grid compact-grid">
+    {% for s in h['subjects'] %}
+    <div class="history-subject-row glass-inner">
+      <div class="hsr-left">
+        <span class="hsr-code">{{ s['code'] or '—' }}</span>
+        <span class="hsr-name">{{ s['name'] }}</span>
+      </div>
+      <div class="hsr-right">
+        <b class="hsr-pct">{{ s['percentage'] }}%</b>
+        <span class="hsr-detail">{{ s['attended'] }}/{{ s['total'] }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</article>
+{% endfor %}
+{% endif %}
+
+<p class="notice" style="margin-top:24px">This portal does not provide attendance marking. It only displays stored attendance and calculation results.</p>
+{% endblock %}

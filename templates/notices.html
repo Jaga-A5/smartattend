@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-head">
+<span class="eyebrow">NOTICE BOARD</span>
+<h1>Semester {{ student['current_semester'] }} notices</h1>
+<p>Showing notices for your current semester and all-semester announcements.</p>
+</div>
+
+<div class="notice-grid">
+{% for n in notices %}
+<article class="glass notice-card {{ 'important' if n['is_important'] else '' }}">
+{% if n['is_important'] %}<span class="notice-tag">Important</span>{% endif %}
+<span class="notice-meta">
+{% if n['semester_number'] %}Semester {{ n['semester_number'] }}{% else %}All Students{% endif %}
+· {{ n['created_at'][:10] }}
+</span>
+<h3>{{ n['title'] }}</h3>
+<p>{{ n['message'] }}</p>
+</article>
+{% else %}
+<article class="glass notice-card"><p>No notices available right now.</p></article>
+{% endfor %}
+</div>
+{% endblock %}

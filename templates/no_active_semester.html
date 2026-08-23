@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}No Active Semester — SmartAttend{% endblock %}
+{% block content %}
+<div class="no-sem-state glass">
+  <div class="no-sem-icon">🎓</div>
+  <span class="eyebrow">SMARTATTEND</span>
+  <h1>No Active Semester</h1>
+  <p class="no-sem-msg">Your current semester has been completed or no semester has been assigned yet. Your administrator will start a new semester soon.</p>
+  <div class="no-sem-actions">
+    <a class="pill" href="{{ url_for('academic_history') }}">View Past Semesters →</a>
+    <a class="pill pill-outline" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

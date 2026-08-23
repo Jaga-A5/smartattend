@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — SmartAttend{% endblock %}
+{% block content %}
+
+{% if not semester %}
+{# No active semester state #}
+<div class="no-sem-state glass">
+  <div class="no-sem-icon">🎓</div>
+  <span class="eyebrow">STUDENT DASHBOARD</span>
+  <h1>{{ greeting }}, {{ student['name'].split()[0] }} 👋</h1>
+  <p class="no-sem-msg">No active semester is currently assigned to your account. Your administrator will start a new semester soon.</p>
+  {% if student['id'] %}
+  <a class="pill" href="{{ url_for('academic_history') }}">View Past Semesters →</a>
+  {% endif %}
+</div>
+{% else %}
+
+<div class="welcome">
+<div>
+<span class="eyebrow">STUDENT DASHBOARD</span>
+<h1>{{ greeting }}, {{ student['name'].split()[0] }} 👋</h1>
+<p class="semester-badge">Active Semester · <strong>Semester {{ student['current_semester'] }}</strong></p>
+</div>
+<a class="pill" href="{{ url_for('current_semester') }}">View semester details →</a>
+</div>
+
+<section class="hero-grid">
+<article class="glass attendance-hero">
+<span>CURRENT SEMESTER ATTENDANCE</span>
+<div class="ring" style="--pct:{{ current['percentage'] }}"><b>{{ current['percentage'] }}%</b></div>
+<strong class="badge {{ current['status'] }}">✓ {{ status_text }}</strong>
+</article>
+<article class="glass insight">
+<span>✦ SMART ATTENDANCE INSIGHT</span>
+<h2>{{ insight['message'] }}</h2>
+<p>Target attendance: {{ student['target_attendance'] }}%</p>
+</article>
+<article class="glass metrics">
+<div><b>{{ current['total'] }}</b><span>Total Classes</span></div>
+<div><b>{{ current['attended'] }}</b><span>Attended</span></div>
+<div><b>{{ current['absent'] }}</b><span>Absent</span></div>
+</article>
+</section>
+
+{# Leave Request Summary #}
+<section class="leave-summary-section">
+  <div class="section-title">
+    <h2>Leave Request Summary</h2>
+    <a href="{{ url_for('leave_requests') }}">Manage leaves →</a>
+  </div>
+  <div class="leave-summary-grid">
+    <article class="glass leave-summary-card pending-card">
+      <span class="ls-icon">⏳</span>
+      <b class="ls-count">{{ leave_stats['pending'] }}</b>
+      <span class="ls-label">Pending</span>
+    </article>
+    <article class="glass leave-summary-card approved-card">
+      <span class="ls-icon">✅</span>
+      <b class="ls-count">{{ leave_stats['approved'] }}</b>
+      <span class="ls-label">Approved</span>
+    </article>
+    <article class="glass leave-summary-card rejected-card">
+      <span class="ls-icon">❌</span>
+      <b class="ls-count">{{ leave_stats['rejected'] }}</b>
+      <span class="ls-label">Rejected</span>
+    </article>
+    <article class="glass leave-summary-card total-card">
+      <span class="ls-icon">📋</span>
+      <b class="ls-count">{{ leave_stats['total'] }}</b>
+      <span class="ls-label">Total</span>
+    </article>
+  </div>
+</section>
+
+<section>
+<div class="section-title">
+<h2>Current Semester Subjects</h2>
+<a href="{{ url_for('current_semester') }}">View all →</a>
+</div>
+<div class="subject-grid">
+{% for x in subjects %}
+<article class="glass subject-card">
+<div><span>{{ x['code'] }}</span><b class="badge {{ x['status'] }}">{{ x['status'] }}</b></div>
+<h3>{{ x['name'] }}</h3>
+<strong>{{ x['percentage'] }}%</strong>
+<div class="progress"><i style="width:{{ x['percentage'] }}%"></i></div>
+<small>{{ x['attended'] }} attended · {{ x['total'] }} total</small>
+</article>
+{% else %}
+<article class="glass subject-card"><p style="color:var(--muted)">No subjects added yet for this semester.</p></article>
+{% endfor %}
+</div>
+</section>
+
+{% if notices %}
+<section>
+<div class="section-title"><h2>Important Notices</h2><a href="{{ url_for('notices') }}">All notices →</a></div>
+<div class="notice-grid">
+{% for n in notices %}
+<article class="glass notice-card important">
+<span class="notice-tag">Important</span>
+<h3>{{ n['title'] }}</h3>
+<p>{{ n['message'][:120] }}{% if n['message']|length > 120 %}…{% endif %}</p>
+</article>
+{% endfor %}
+</div>
+</section>
+{% endif %}
+
+{% if today_schedule %}
+<section>
+<div class="section-title"><h2>Today's Timetable</h2><a href="{{ url_for('timetable') }}">Full week →</a></div>
+<div class="timetable-today">
+{% for slot in today_schedule %}
+<article class="glass timetable-slot">
+<div class="slot-time">{{ slot['start_time'] }} – {{ slot['end_time'] }}</div>
+<h3>{{ slot['subject'] }}</h3>
+<p>Room: {{ slot['room'] or '—' }} · {{ slot['faculty'] or '—' }}</p>
+</article>
+{% endfor %}
+</div>
+</section>
+{% endif %}
+
+{% endif %}
+{% endblock %}

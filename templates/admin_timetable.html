@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-head">
+<span class="eyebrow">TIMETABLE MANAGEMENT</span>
+<h1>Publish student timetables.</h1>
+<p>Timetables are created for each student's current semester.</p>
+</div>
+
+<form class="glass admin-filter" method="get">
+<label>Select student
+<select name="student_id" onchange="this.form.submit()">
+{% for s in students %}
+<option value="{{ s['id'] }}" {% if selected and selected['id']==s['id'] %}selected{% endif %}>{{ s['name'] }} (Semester {{ s['current_semester'] }})</option>
+{% endfor %}
+</select>
+</label>
+</form>
+
+{% if selected %}
+<section class="calc-layout">
+<form class="glass calc-form" method="post">
+<input type="hidden" name="student_id" value="{{ selected['id'] }}">
+<input type="hidden" name="action" value="add">
+<h2>Add entry · Semester {{ selected['current_semester'] }}</h2>
+<label>Day<select name="day_of_week">{% for d in days %}<option value="{{ d }}">{{ d|capitalize }}</option>{% endfor %}</select></label>
+<label>Start time<input type="time" name="start_time" required></label>
+<label>End time<input type="time" name="end_time" required></label>
+<label>Subject<input name="subject" required></label>
+<label>Room<input name="room"></label>
+<label>Faculty<input name="faculty"></label>
+<button>Add Entry</button>
+</form>
+<article class="glass leave-info">
+<h2>{{ selected['name'] }}</h2>
+<p>Student ID: {{ selected['student_id'] }}</p>
+<p>Current Semester: {{ selected['current_semester'] }}</p>
+<p>Students can only view this timetable — they cannot edit it.</p>
+</article>
+</section>
+
+<div class="glass table-wrap">
+<table>
+<thead>
+<tr><th>Day</th><th>Time</th><th>Subject</th><th>Room</th><th>Faculty</th><th>Actions</th></tr>
+</thead>
+<tbody>
+{% for e in entries %}
+<tr>
+<td>{{ e['day_of_week']|capitalize }}</td>
+<td>{{ e['start_time'] }} – {{ e['end_time'] }}</td>
+<td>{{ e['subject'] }}</td>
+<td>{{ e['room'] or '—' }}</td>
+<td>{{ e['faculty'] or '—' }}</td>
+<td class="actions-cell">
+<form method="post" class="inline-form">
+<input type="hidden" name="student_id" value="{{ selected['id'] }}">
+<input type="hidden" name="action" value="delete">
+<input type="hidden" name="entry_id" value="{{ e['id'] }}">
+<button type="submit" class="btn-danger">Delete</button>
+</form>
+</td>
+</tr>
+<tr class="edit-row">
+<td colspan="6">
+<form method="post" class="inline-edit-form">
+<input type="hidden" name="student_id" value="{{ selected['id'] }}">
+<input type="hidden" name="action" value="edit">
+<input type="hidden" name="entry_id" value="{{ e['id'] }}">
+<select name="day_of_week">{% for d in days %}<option value="{{ d }}" {% if e['day_of_week']==d %}selected{% endif %}>{{ d|capitalize }}</option>{% endfor %}</select>
+<input type="time" name="start_time" value="{{ e['start_time'] }}">
+<input type="time" name="end_time" value="{{ e['end_time'] }}">
+<input name="subject" value="{{ e['subject'] }}">
+<input name="room" value="{{ e['room'] or '' }}">
+<input name="faculty" value="{{ e['faculty'] or '' }}">
+<button type="submit">Save</button>
+</form>
+</td>
+</tr>
+{% else %}
+<tr><td colspan="6">No timetable entries yet.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}
