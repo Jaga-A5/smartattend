@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Academic History — SmartAttend{% endblock %}
+{% block content %}
+<div class="welcome">
+<div>
+<span class="eyebrow">ACADEMIC HISTORY</span>
+<h1>Previous Semesters</h1>
+<p>Read-only archive of your completed semesters.</p>
+</div>
+<a class="pill" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+</div>
+
+{% if not history %}
+<article class="glass notice-card" style="text-align:center;padding:48px 32px;">
+  <div style="font-size:48px;margin-bottom:16px">📚</div>
+  <h3>No Archived Semesters Yet</h3>
+  <p>When a semester is completed and closed by the administrator, its full attendance summary will appear here as a read-only record.</p>
+</article>
+{% else %}
+
+{% for h in history %}
+<article class="glass history-sem-card">
+  <div class="history-sem-header">
+    <div class="history-sem-info">
+      <span class="eyebrow">ARCHIVED SEMESTER</span>
+      <h2>{{ h['semester_label'] }}</h2>
+      <span class="history-closed-at">Completed: {{ h['closed_at'][:10] }}</span>
+    </div>
+    <div class="history-sem-stats">
+      <div class="history-ring-wrap">
+        <div class="ring" style="--pct:{{ h['percentage'] }};width:110px;height:110px">
+          <b style="font-size:20px">{{ h['percentage'] }}%</b>
+        </div>
+        <b class="badge {{ h['status'] }}">{{ h['status'] }}</b>
+      </div>
+      <div class="history-metrics">
+        <div><b>{{ h['total_classes'] }}</b><span>Total</span></div>
+        <div><b>{{ h['attended_classes'] }}</b><span>Attended</span></div>
+        <div><b>{{ h['absent_classes'] }}</b><span>Absent</span></div>
+      </div>
+    </div>
+  </div>
+
+  {% if h['subjects'] %}
+  <div class="history-subjects-title">
+    <span>Subject-wise Breakdown</span>
+  </div>
+  <div class="history-subjects-grid">
+    {% for s in h['subjects'] %}
+    <div class="history-subject-row glass-inner">
+      <div class="hsr-left">
+        <span class="hsr-code">{{ s['code'] or '—' }}</span>
+        <span class="hsr-name">{{ s['name'] }}</span>
+        {% if s['faculty'] %}<span class="hsr-faculty">{{ s['faculty'] }}</span>{% endif %}
+      </div>
+      <div class="hsr-right">
+        <b class="hsr-pct">{{ s['percentage'] }}%</b>
+        <div class="progress" style="width:100px"><i style="width:{{ s['percentage'] }}%"></i></div>
+        <span class="hsr-detail">{{ s['attended'] }}/{{ s['total'] }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</article>
+{% endfor %}
+
+{% endif %}
+{% endblock %}
